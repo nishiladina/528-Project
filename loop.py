@@ -5,19 +5,22 @@ from collections import deque
 import numpy as np
 import time 
 
-WINDOW_SIZE = 100   # e.g., 100 samples @ 50Hz = 2 seconds
+WINDOW_SIZE = 150   # e.g., 100 samples @ 50Hz = 3 seconds
 STEP_SIZE   = 50    # 50% overlap → new prediction every 1 second
 
 
 svm = #TBD
 scaler = #TBD
+captionsOn = False
+activated = True
+
 
 def simulate_imu_stream(svm, scaler):
     buffer = deque(maxlen=WINDOW_SIZE)
     sample_count = 0
 
     while True:
-        sample = read_imu_sensor()          # your hardware/socket call
+        sample = read_imu_sensor() # your hardware/socket call
         buffer.append(sample)
         sample_count += 1
 
@@ -34,9 +37,6 @@ def simulate_imu_stream(svm, scaler):
 
 #What we will probably do, is check every past 3 seconds of data. If the svm matches to something then we 
 #will run the cooresponding command. 
-
-captionsOn = False
-activated = True
 
 def movement(label, buffer):
     #Look Down - scroll down
@@ -76,8 +76,11 @@ def movement(label, buffer):
     elif(activated and label == "CW rotation"):
         activated = not activated
 
-    if(label != "None"):
+    if(label == "None"):
         buffer.popleft()
+
+    else:
+        buffer.clear()
 
 
 
