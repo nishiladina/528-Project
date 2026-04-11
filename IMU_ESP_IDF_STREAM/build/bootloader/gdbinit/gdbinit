@@ -1,0 +1,2 @@
+source C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader/gdbinit/symbols
+source C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader/gdbinit/connect
