@@ -1,3 +1,10 @@
+"""
+Shows devices available for connection via Bluetooth. The ESP32 should show up as "IMU-Stream".
+
+Usage:
+  pip install bleak
+  python bluetooth_test.py
+"""
 import asyncio
 from bleak import BleakScanner
 

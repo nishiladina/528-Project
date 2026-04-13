@@ -1,3 +1,13 @@
+"""
+Prints IMU sensor data streamed over BLE from an ESP32-S3.
+
+Expected line format (sent over BLE):
+  AX:0.123 AY:-0.456 AZ:9.789 GX:1.23 GY:-0.45 GZ:0.67 T:25.30
+
+Usage:
+  pip install bleak
+  python imu_stream.py
+"""
 import asyncio
 from bleak import BleakClient, BleakScanner
 

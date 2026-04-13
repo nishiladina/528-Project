@@ -1,7 +1,7 @@
 {
     "version":            "1.2",
     "project_name":       "IMU",
-    "project_version":    "dc31987",
+    "project_version":    "10bd4ef-dirty",
     "project_path":       "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM",
     "idf_path":           "C:/esp/v5.5.2/esp-idf",
     "build_dir":          "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build",
