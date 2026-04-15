@@ -2,7 +2,7 @@ import numpy as np
 import re
 import glob
 
-SAMPLE_RATE = 50  # Hz
+SAMPLE_RATE = 33  # Hz
 
 
 # Load data from text files
@@ -44,13 +44,19 @@ def compute_fft_features(signal, fs):
 
 # Time features for SVM
 def compute_time_features(signal):
+    idx_max = np.argmax(signal)
+    idx_min = np.argmin(signal)
+    N = len(signal)
+    
     return [
         np.mean(signal),
         np.std(signal),
         np.max(signal),
         np.min(signal),
         np.max(signal) - np.min(signal),  # range
-        np.sum(signal**2) / len(signal)   # energy
+        np.sum(signal**2) / len(signal),   # energy
+        float(idx_min < idx_max),         # 1 if min happens first, else 0 for directionality
+        (idx_max - idx_min) / N          # normalized order/distance
     ]
 
 
@@ -82,7 +88,12 @@ def build_dataset(base_path):
         "left": 0,
         "right": 1,
         "up": 2,
-        "down": 3
+        "down": 3,
+        "right_lean": 4,
+        "left_lean": 5,
+        "clockwise": 6,
+        "counter_clockwise": 7,
+        "no_movement": 8
     }
 
     for gesture, label in gesture_map.items():
