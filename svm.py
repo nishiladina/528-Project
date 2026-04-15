@@ -22,7 +22,7 @@ print("Mean accuracy:", scores.mean())
 y_pred = cross_val_predict(model, X, y, cv=5)
 cm = confusion_matrix(y, y_pred)
 
-disp = ConfusionMatrixDisplay(cm, display_labels=["left", "right", "up", "down"])
+disp = ConfusionMatrixDisplay(cm, display_labels=["left", "right", "up", "down", "right_lean", "left_lean", "clockwise", "counter_clockwise", "no_movement"])
 disp.plot()
 
 plt.title("Cross-Validated Confusion Matrix")
