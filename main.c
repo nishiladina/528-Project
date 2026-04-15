@@ -23,12 +23,12 @@ void app_main(void)
     mpu6050_acceleration_t accel;
     mpu6050_rotation_t gyro;
 
-    // collect data 20 times
-    for (int i = 1; i <= 20; i++){
+    // collect data 33 times
+    for (int i = 1; i <= 33; i++){
         printf("FILE_START:%02d\n", i);
         
         int64_t start_time = esp_timer_get_time();
-        // Run for 4 seconds
+        // Run for 3 seconds
         while (esp_timer_get_time() - start_time < 3000000)
         {
             mpu6050_get_acceleration(&dev, &accel);
@@ -36,8 +36,9 @@ void app_main(void)
 
             printf("Accel: %.2f, %.2f, %.2f\n", accel.x, accel.y, accel.z);
             printf("Gyro: %.2f, %.2f, %.2f\n", gyro.x, gyro.y, gyro.z);
-
-            vTaskDelay(pdMS_TO_TICKS(20));
+            
+            // wait 30 ms before the next reading (33 hz)
+            vTaskDelay(pdMS_TO_TICKS(30));
         }
 
         printf("FILE_END:%02d\n", i);
