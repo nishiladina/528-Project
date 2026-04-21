@@ -4,7 +4,7 @@ import serial
 DIRECTION = "no_movement"
 PORT = "COM5"       # port number
 BAUD = 115200       
-OUTPUT_DIR = f"./nishil-data/{DIRECTION}" #change folder name to the gesture being recorded
+OUTPUT_DIR = f"./person-data/{DIRECTION}" # change folder name to the gesture being recorded
 num_files = 33     # number of files to record per gesture
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
