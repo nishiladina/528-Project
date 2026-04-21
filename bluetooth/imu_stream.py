@@ -9,6 +9,7 @@ Usage:
   python imu_stream.py
 """
 import asyncio
+import re
 from bleak import BleakClient, BleakScanner
 
 DEVICE_NAME   = "IMU-Stream"
@@ -16,14 +17,22 @@ NUS_TX_UUID   = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"  # device → host (notif
 
 buffer = ""
 
+
+LINE_RE = re.compile(
+    r"AX:(?P<ax>[-\d.]+)\s+AY:(?P<ay>[-\d.]+)\s+AZ:(?P<az>[-\d.]+)"
+    r"\s*\|?\s*"
+    r"GX:(?P<gx>[-\d.]+)\s+GY:(?P<gy>[-\d.]+)\s+GZ:(?P<gz>[-\d.]+)"
+    r"\s*\|?\s*"
+    r"T:(?P<t>[-\d.]+)"
+)
+
 def notification_handler(sender, data: bytearray):
     global buffer
     buffer += data.decode("utf-8", errors="ignore")
-    # Print complete lines as they arrive
     while "\n" in buffer:
         line, buffer = buffer.split("\n", 1)
         line = line.strip()
-        if line:
+        if LINE_RE.fullmatch(line):
             print(line)
 
 async def main():
