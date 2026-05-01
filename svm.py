@@ -1,3 +1,4 @@
+"""
 import numpy as np
 from sklearn.model_selection import cross_val_score, cross_val_predict
 from sklearn.svm import SVC
@@ -5,6 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
+
 
 # Load data
 X = np.load("X.npy")
@@ -28,3 +30,22 @@ disp.plot()
 plt.title("Cross-Validated Confusion Matrix")
 plt.show()
 plt.show(block=True)
+"""
+import numpy as np
+import joblib
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+
+X = np.load("X.npy")
+y = np.load("y.npy")
+
+model = make_pipeline(
+    StandardScaler(),
+    SVC(kernel="rbf", probability=True)
+)
+
+model.fit(X, y)
+
+joblib.dump(model, "svm_model.joblib")
+print("Saved model to svm_model.joblib")
