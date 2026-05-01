@@ -96,22 +96,26 @@ def build_dataset(base_path):
         "no_movement": 8
     }
 
-    for gesture, label in gesture_map.items():
-        files = glob.glob(f"{base_path}/{gesture}/*.txt")
+    # Finds ../data/data_1, ../data/data_2, ../data/data_3
+    dataset_folders = glob.glob(f"{base_path}/data_*")
+    
+    for dataset_folder in dataset_folders:
+        for gesture, label in gesture_map.items():
+            files = glob.glob(f"{dataset_folder}/{gesture}/*.txt")
 
-        for f in files:
-            accel, gyro = load_data(f)
-            feat = extract_features(accel, gyro)
+            for file in files:
+                accel, gyro = load_data(file)
 
-            X.append(feat)
-            y.append(label)
+                feat = extract_features(accel, gyro)
+                X.append(feat)
+                y.append(label)
 
     return np.array(X), np.array(y)
 
 
 # MAIN function to build dataset and save for SVM training
 if __name__ == "__main__":
-    X, y = build_dataset("../")
+    X, y = build_dataset("../data/")
 
     print("Feature shape:", X.shape)  # should be (num_files, ~54)
     print("Labels shape:", y.shape)
