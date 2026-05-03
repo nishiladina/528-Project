@@ -23,16 +23,8 @@ from svm_dataset import extract_features
 FS = 33.0
 MODEL_PATH = "svm_model.joblib"
 
+STEP_SAMPLES = 15
 WINDOW_SAMPLES = 100
-PRE_SAMPLES = 25
-MIN_GESTURE_GAP = 0.8
-
-# You may need to tune these
-ENERGY_THRESHOLD = 0.5
-QUIET_THRESHOLD = 0.3
-QUIET_SAMPLES = 20
-
-SAVE_CAPTURES = True
 
 label_map = {
     0: "left",
@@ -111,75 +103,24 @@ class GestureEngine:
         self.model = model
         self.result_queue = result_queue
 
-        self.buffer = collections.deque(maxlen=WINDOW_SAMPLES + PRE_SAMPLES)
+        self.buffer = collections.deque(maxlen=WINDOW_SAMPLES)
+        self.prediction_buffer = collections.deque(maxlen=5)
+        self.sample_count = 0
+
         self.raw_history = collections.deque(maxlen=200)
-
-        self.armed = True
-        self.triggered = False
-        self.trigger_buf = []
-
-        self.quiet_count = 0
-        self.last_gesture_t = -999.0
 
     def push(self, ts, row):
         self.buffer.append(row)
         self.raw_history.append(row.tolist())
+        self.sample_count += 1
 
-        accel = row[:3]
+        # Same logic as old live_prediction:
+        # predict every STEP_SIZE samples once buffer is full
+        if len(self.buffer) == WINDOW_SAMPLES and self.sample_count % STEP_SAMPLES == 0:
+            self._predict_window()
 
-        # Energy based on current accel variance
-        energy = float(np.var(accel))
-
-        now = time.time()
-        gap_ok = (now - self.last_gesture_t) > MIN_GESTURE_GAP
-
-        if self.triggered:
-            self.trigger_buf.append(row)
-
-            if len(self.trigger_buf) >= WINDOW_SAMPLES:
-                self._classify()
-                self.triggered = False
-                self.armed = False
-                self.quiet_count = 0
-                self.trigger_buf = []
-
-        else:
-            if not self.armed:
-                if energy < QUIET_THRESHOLD:
-                    self.quiet_count += 1
-
-                    if self.quiet_count >= QUIET_SAMPLES:
-                        self.armed = True
-                        self.quiet_count = 0
-                else:
-                    self.quiet_count = 0
-
-            if self.armed and gap_ok and energy > ENERGY_THRESHOLD:
-                pre = list(self.buffer)[-PRE_SAMPLES:]
-                self.trigger_buf = pre[:]
-                self.triggered = True
-
-    def _classify(self):
-        data = np.array(self.trigger_buf[:WINDOW_SAMPLES], dtype=np.float64)
-
-        if len(data) < WINDOW_SAMPLES:
-            data = np.vstack([
-                data,
-                np.tile(data[-1], (WINDOW_SAMPLES - len(data), 1))
-            ])
-
-        if SAVE_CAPTURES:
-            os.makedirs("captured", exist_ok=True)
-            existing = len(os.listdir("captured"))
-            cap_path = f"captured/capture_{existing:03d}.txt"
-            np.savetxt(
-                cap_path,
-                data,
-                delimiter=",",
-                header="AX,AY,AZ,GX,GY,GZ",
-                comments=""
-            )
-            print(f"Saved {cap_path}")
+    def _predict_window(self):
+        data = np.array(self.buffer, dtype=np.float64)
 
         try:
             accel = data[:, 0:3]
@@ -188,17 +129,27 @@ class GestureEngine:
             features = extract_features(accel, gyro)
 
             pred = int(self.model.predict([features])[0])
-            gesture = label_map[pred]
+            label = label_map[pred]
 
-            print("Gesture:", gesture)
+            print("Prediction:", label)
 
-            self.last_gesture_t = time.time()
+            self.prediction_buffer.append(label)
 
-            self.result_queue.put({
-                "gesture": gesture,
-                "confidence": 1.0,
-                "ts": time.time()
-            })
+            if len(self.prediction_buffer) == 5:
+                majority_label = collections.Counter(self.prediction_buffer).most_common(1)[0][0]
+
+                if majority_label != "no_movement":
+                    print("Gesture:", majority_label)
+
+                    self.result_queue.put({
+                        "gesture": majority_label,
+                        "confidence": 1.0,
+                        "ts": time.time()
+                    })
+
+                    self.prediction_buffer.clear()
+                    self.buffer.clear()
+                    self.sample_count = 0
 
         except Exception as e:
             print("Classification error:", e)
