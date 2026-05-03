@@ -39,6 +39,6 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/esp-idf/newlib/src/port/cmake_install.cmake")
+  include("C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/esp-idf/newlib/src/port/cmake_install.cmake")
 endif()
 

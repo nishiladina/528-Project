@@ -2,10 +2,7 @@
 Prints IMU sensor data streamed over BLE from an ESP32-S3.
 
 Expected line format (sent over BLE):
-  Accel: -0.07, -0.05, -0.96
-  Gyro: -1.40, 6.00, 5.42
-
-Accel and Gyro lines arrive in pairs and are printed together.
+  0.039,0.883,-0.077,57.969,-6.115,1.344
 
 Usage:
   pip install bleak
@@ -15,35 +12,25 @@ import asyncio
 import re
 from bleak import BleakClient, BleakScanner
 
-DEVICE_NAME = "IMU-Stream"
-NUS_TX_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"  # device → host (notify)
+DEVICE_NAME   = "IMU-Stream"
+NUS_TX_UUID   = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"  # device → host (notify)
 
 buffer = ""
-pending_accel = None  # holds the most recent unpaired Accel line
 
-ACCEL_RE = re.compile(r"Accel:\s*([-\d.]+),\s*([-\d.]+),\s*([-\d.]+)")
-GYRO_RE  = re.compile(r"Gyro:\s*([-\d.]+),\s*([-\d.]+),\s*([-\d.]+)")
 
+LINE_RE = re.compile(
+    r"(?P<ax>[-\d.]+),(?P<ay>[-\d.]+),(?P<az>[-\d.]+),"
+    r"(?P<gx>[-\d.]+),(?P<gy>[-\d.]+),(?P<gz>[-\d.]+)"
+)
 
 def notification_handler(sender, data: bytearray):
-    global buffer, pending_accel
+    global buffer
     buffer += data.decode("utf-8", errors="ignore")
     while "\n" in buffer:
         line, buffer = buffer.split("\n", 1)
         line = line.strip()
-
-        m = ACCEL_RE.fullmatch(line)
-        if m:
-            pending_accel = m.groups()
-            continue
-
-        m = GYRO_RE.fullmatch(line)
-        if m and pending_accel is not None:
-            ax, ay, az = pending_accel
-            gx, gy, gz = m.groups()
-            print(f"Accel: {ax}, {ay}, {az}  |  Gyro: {gx}, {gy}, {gz}")
-            pending_accel = None
-
+        if LINE_RE.fullmatch(line):
+            print(line)
 
 async def main():
     print(f"Scanning for '{DEVICE_NAME}'...")
@@ -66,7 +53,6 @@ async def main():
         finally:
             await client.stop_notify(NUS_TX_UUID)
             print("\nDisconnected.")
-
 
 if __name__ == "__main__":
     asyncio.run(main())

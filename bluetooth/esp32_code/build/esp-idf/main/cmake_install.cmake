@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/main
+# Install script for directory: C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/main
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

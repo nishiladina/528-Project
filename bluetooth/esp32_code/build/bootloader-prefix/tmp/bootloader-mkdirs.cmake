@@ -10,18 +10,18 @@ if(NOT EXISTS "C:/esp/v5.5.2/esp-idf/components/bootloader/subproject")
   file(MAKE_DIRECTORY "C:/esp/v5.5.2/esp-idf/components/bootloader/subproject")
 endif()
 file(MAKE_DIRECTORY
-  "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader"
-  "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix"
-  "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix/tmp"
-  "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix/src/bootloader-stamp"
-  "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix/src"
-  "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix/src/bootloader-stamp"
+  "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader"
+  "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix"
+  "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix/tmp"
+  "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix/src/bootloader-stamp"
+  "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix/src"
+  "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix/src/bootloader-stamp"
 )
 
 set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
-    file(MAKE_DIRECTORY "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
+    file(MAKE_DIRECTORY "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
 endforeach()
 if(cfgdir)
-  file(MAKE_DIRECTORY "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
+  file(MAKE_DIRECTORY "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
 endif()

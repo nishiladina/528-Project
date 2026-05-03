@@ -2,34 +2,34 @@
 	"sources" : 
 	[
 		{
-			"file" : "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/CMakeFiles/bootloader"
+			"file" : "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/CMakeFiles/bootloader"
 		},
 		{
-			"file" : "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/CMakeFiles/bootloader.rule"
+			"file" : "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/CMakeFiles/bootloader.rule"
 		},
 		{
-			"file" : "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/CMakeFiles/bootloader-complete.rule"
+			"file" : "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/CMakeFiles/bootloader-complete.rule"
 		},
 		{
-			"file" : "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule"
+			"file" : "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule"
 		},
 		{
-			"file" : "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule"
+			"file" : "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule"
 		},
 		{
-			"file" : "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule"
+			"file" : "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule"
 		},
 		{
-			"file" : "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule"
+			"file" : "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule"
 		},
 		{
-			"file" : "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule"
+			"file" : "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule"
 		},
 		{
-			"file" : "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule"
+			"file" : "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule"
 		},
 		{
-			"file" : "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule"
+			"file" : "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule"
 		}
 	],
 	"target" : 

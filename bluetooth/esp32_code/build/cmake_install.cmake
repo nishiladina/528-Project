@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM
+# Install script for directory: C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/esp-idf/cmake_install.cmake")
+  include("C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/esp-idf/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -57,6 +57,6 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-  file(WRITE "C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

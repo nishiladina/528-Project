@@ -1,4 +1,4 @@
-/* * Data converted from C:/Users/natem/CS 528/528-Project/IMU_ESP_IDF_STREAM/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from C:/Users/natem/CS 528/528-Project/bluetooth/esp32_code/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 #if !defined (__APPLE__) && !defined (__linux__)

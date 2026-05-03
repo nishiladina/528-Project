@@ -4,10 +4,7 @@ Real-time IMU plotter for MPU6050 streamed over BLE (Nordic UART Service)
 from an ESP32-S3.
 
 Expected line format (sent over BLE):
-  Accel: -0.07, -0.05, -0.96
-  Gyro: -1.40, 6.00, 5.42
-
-Accel and Gyro arrive on separate, sequential lines. No temperature channel.
+  AX:0.123 AY:-0.456 AZ:9.789 GX:1.23 GY:-0.45 GZ:0.67 T:25.30
 
 Usage:
   pip install bleak matplotlib
@@ -16,6 +13,7 @@ Usage:
 
 import asyncio
 import re
+import sys
 import threading
 import time
 from collections import deque
@@ -34,9 +32,21 @@ NUS_TX_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
 WINDOW_SEC = 5
 SAMPLE_HZ  = 100
 
-# ── Line parsers ──────────────────────────────────────────────────────────────
-ACCEL_RE = re.compile(r"Accel:\s*([-\d.]+),\s*([-\d.]+),\s*([-\d.]+)")
-GYRO_RE  = re.compile(r"Gyro:\s*([-\d.]+),\s*([-\d.]+),\s*([-\d.]+)")
+# ── Line parser ───────────────────────────────────────────────────────────────
+# Matches the plain BLE format (no ESP_LOGI prefix)
+LINE_RE = re.compile(
+    r"AX:(?P<ax>[-\d.]+)\s+AY:(?P<ay>[-\d.]+)\s+AZ:(?P<az>[-\d.]+)"
+    r"\s*\|?\s*"
+    r"GX:(?P<gx>[-\d.]+)\s+GY:(?P<gy>[-\d.]+)\s+GZ:(?P<gz>[-\d.]+)"
+    r"\s*\|?\s*"
+    r"T:(?P<t>[-\d.]+)"
+)
+
+def parse_line(line: str):
+    m = LINE_RE.search(line)
+    if m:
+        return tuple(float(m.group(k)) for k in ("ax", "ay", "az", "gx", "gy", "gz", "t"))
+    return None
 
 # ── Colour palette ────────────────────────────────────────────────────────────
 C = {
@@ -49,6 +59,7 @@ C = {
     "gx":    "#f48fb1",
     "gy":    "#f06292",
     "gz":    "#e91e63",
+    "temp":  "#ffcc02",
     "text":  "#e0e0e0",
     "title": "#ffffff",
 }
@@ -58,23 +69,23 @@ class BLEReader:
     """Runs an asyncio BLE loop in a background thread, fills shared deques."""
 
     def __init__(self, name: str, buf_size: int):
-        self.name      = name
-        self.lock      = threading.Lock()
-        self.status    = "Scanning…"
+        self.name     = name
+        self.lock     = threading.Lock()
+        self.status   = "Scanning…"
         self.connected = False
-        self._buffer   = ""          # reassembly buffer for chunked BLE packets
-        self._pending_accel = None   # unpaired Accel values
+        self._buffer  = ""        # reassembly buffer for chunked BLE packets
 
-        self.t  = deque(maxlen=buf_size)
-        self.ax = deque(maxlen=buf_size)
-        self.ay = deque(maxlen=buf_size)
-        self.az = deque(maxlen=buf_size)
-        self.gx = deque(maxlen=buf_size)
-        self.gy = deque(maxlen=buf_size)
-        self.gz = deque(maxlen=buf_size)
+        self.t    = deque(maxlen=buf_size)
+        self.ax   = deque(maxlen=buf_size)
+        self.ay   = deque(maxlen=buf_size)
+        self.az   = deque(maxlen=buf_size)
+        self.gx   = deque(maxlen=buf_size)
+        self.gy   = deque(maxlen=buf_size)
+        self.gz   = deque(maxlen=buf_size)
+        self.temp = deque(maxlen=buf_size)
 
-        self._t0     = None
-        self._loop   = asyncio.new_event_loop()
+        self._t0   = None
+        self._loop = asyncio.new_event_loop()
         self._thread = threading.Thread(target=self._run_loop, daemon=True)
         self._thread.start()
 
@@ -94,11 +105,10 @@ class BLEReader:
                     continue
                 self.status = f"Connecting to {device.address}…"
                 async with BleakClient(device) as client:
-                    self.connected      = True
-                    self.status         = f"Connected  {device.address}"
-                    self._t0            = time.perf_counter()
-                    self._buffer        = ""
-                    self._pending_accel = None
+                    self.connected = True
+                    self.status    = f"Connected  {device.address}"
+                    self._t0       = time.perf_counter()
+                    self._buffer   = ""
                     await client.start_notify(NUS_TX_UUID, self._on_notify)
                     while client.is_connected:
                         await asyncio.sleep(0.5)
@@ -112,23 +122,16 @@ class BLEReader:
         self._buffer += data.decode("utf-8", errors="ignore")
         while "\n" in self._buffer:
             line, self._buffer = self._buffer.split("\n", 1)
-            line = line.strip()
-
-            m = ACCEL_RE.fullmatch(line)
-            if m:
-                self._pending_accel = tuple(float(v) for v in m.groups())
+            parsed = parse_line(line.strip())
+            if parsed is None:
                 continue
-
-            m = GYRO_RE.fullmatch(line)
-            if m and self._pending_accel is not None:
-                ax, ay, az = self._pending_accel
-                gx, gy, gz = (float(v) for v in m.groups())
-                self._pending_accel = None
-                now = time.perf_counter() - self._t0
-                with self.lock:
-                    self.t.append(now)
-                    self.ax.append(ax); self.ay.append(ay); self.az.append(az)
-                    self.gx.append(gx); self.gy.append(gy); self.gz.append(gz)
+            ax, ay, az, gx, gy, gz, temp = parsed
+            now = time.perf_counter() - self._t0
+            with self.lock:
+                self.t.append(now)
+                self.ax.append(ax);   self.ay.append(ay);   self.az.append(az)
+                self.gx.append(gx);   self.gy.append(gy);   self.gz.append(gz)
+                self.temp.append(temp)
 
     def snapshot(self):
         with self.lock:
@@ -136,6 +139,7 @@ class BLEReader:
                 list(self.t),
                 list(self.ax), list(self.ay), list(self.az),
                 list(self.gx), list(self.gy), list(self.gz),
+                list(self.temp),
             )
 
 # ── Plot helpers ──────────────────────────────────────────────────────────────
@@ -160,36 +164,40 @@ def main():
     reader   = BLEReader(DEVICE_NAME, buf_size)
 
     plt.style.use("dark_background")
-    fig = plt.figure(figsize=(13, 7), facecolor=C["bg"])
+    fig = plt.figure(figsize=(13, 8), facecolor=C["bg"])
     fig.canvas.manager.set_window_title("MPU6050 — Real-Time BLE Stream")
 
-    gs = gridspec.GridSpec(2, 1, figure=fig, hspace=0.45,
+    gs = gridspec.GridSpec(3, 1, figure=fig, hspace=0.45,
                            left=0.08, right=0.97, top=0.90, bottom=0.08)
 
     ax_acc  = fig.add_subplot(gs[0])
     ax_gyro = fig.add_subplot(gs[1])
+    ax_temp = fig.add_subplot(gs[2])
 
     style_axes(ax_acc,  "Acceleration (g)")
     style_axes(ax_gyro, "Angular rate (°/s)")
+    style_axes(ax_temp, "Temperature (°C)")
 
-    fig.suptitle("MPU6050  Real-Time BLE Stream",
+    fig.suptitle("MPU6050  Real-Time BLE Stream  — 100 Hz",
                  color=C["title"], fontsize=13, fontweight="bold")
     status_txt = fig.text(0.5, 0.005, reader.status,
                           ha="center", fontsize=8, color="#888888")
 
-    la_x, = ax_acc.plot([], [],  color=C["ax"],  lw=1.2, label="Accel X")
-    la_y, = ax_acc.plot([], [],  color=C["ay"],  lw=1.2, label="Accel Y")
-    la_z, = ax_acc.plot([], [],  color=C["az"],  lw=1.2, label="Accel Z")
+    la_x, = ax_acc.plot([], [], color=C["ax"],   lw=1.2, label="Accel X")
+    la_y, = ax_acc.plot([], [], color=C["ay"],   lw=1.2, label="Accel Y")
+    la_z, = ax_acc.plot([], [], color=C["az"],   lw=1.2, label="Accel Z")
     lg_x, = ax_gyro.plot([], [], color=C["gx"],  lw=1.2, label="Gyro X")
     lg_y, = ax_gyro.plot([], [], color=C["gy"],  lw=1.2, label="Gyro Y")
     lg_z, = ax_gyro.plot([], [], color=C["gz"],  lw=1.2, label="Gyro Z")
+    lt,   = ax_temp.plot([], [], color=C["temp"], lw=1.5, label="Temperature")
 
     for a, lines in [(ax_acc,  [la_x, la_y, la_z]),
-                     (ax_gyro, [lg_x, lg_y, lg_z])]:
+                     (ax_gyro, [lg_x, lg_y, lg_z]),
+                     (ax_temp, [lt])]:
         a.legend(handles=lines, loc="upper left", fontsize=7,
                  facecolor=C["panel"], edgecolor=C["grid"], labelcolor=C["text"])
 
-    ax_gyro.set_xlabel("Time (s)", fontsize=9)
+    ax_temp.set_xlabel("Time (s)", fontsize=9)
 
     ro_ax = readout(ax_acc,  0.83)
     ro_ay = readout(ax_acc,  0.50)
@@ -197,9 +205,10 @@ def main():
     ro_gx = readout(ax_gyro, 0.83)
     ro_gy = readout(ax_gyro, 0.50)
     ro_gz = readout(ax_gyro, 0.17)
+    ro_t  = readout(ax_temp, 0.50)
 
     def update(_):
-        t, ax_, ay_, az_, gx_, gy_, gz_ = reader.snapshot()
+        t, ax_, ay_, az_, gx_, gy_, gz_, tmp = reader.snapshot()
         if len(t) < 2:
             status_txt.set_text(reader.status)
             return
@@ -210,14 +219,16 @@ def main():
         def trim(xs):
             return [x for x, ti in zip(xs, t) if ti >= t_lo]
 
-        tv  = [ti for ti in t if ti >= t_lo]
-        axv = trim(ax_); ayv = trim(ay_); azv = trim(az_)
-        gxv = trim(gx_); gyv = trim(gy_); gzv = trim(gz_)
+        tv   = [ti for ti in t if ti >= t_lo]
+        axv  = trim(ax_); ayv = trim(ay_); azv = trim(az_)
+        gxv  = trim(gx_); gyv = trim(gy_); gzv = trim(gz_)
+        tmpv = trim(tmp)
 
         la_x.set_data(tv, axv); la_y.set_data(tv, ayv); la_z.set_data(tv, azv)
         lg_x.set_data(tv, gxv); lg_y.set_data(tv, gyv); lg_z.set_data(tv, gzv)
+        lt.set_data(tv, tmpv)
 
-        for a in (ax_acc, ax_gyro):
+        for a in (ax_acc, ax_gyro, ax_temp):
             a.set_xlim(t_lo, t_now)
 
         def auto_ylim(ax, *series):
@@ -229,6 +240,7 @@ def main():
 
         auto_ylim(ax_acc,  axv, ayv, azv)
         auto_ylim(ax_gyro, gxv, gyv, gzv)
+        auto_ylim(ax_temp, tmpv)
 
         if ax_:
             ro_ax.set_text(f"AX {ax_[-1]:+7.3f}")
@@ -237,12 +249,12 @@ def main():
             ro_gx.set_text(f"GX {gx_[-1]:+7.2f}")
             ro_gy.set_text(f"GY {gy_[-1]:+7.2f}")
             ro_gz.set_text(f"GZ {gz_[-1]:+7.2f}")
+            ro_t.set_text(f"{tmp[-1]:.2f} °C")
 
         status_txt.set_text(reader.status)
 
     ani = FuncAnimation(fig, update, interval=50, blit=False, cache_frame_data=False)
     plt.show()
-
 
 if __name__ == "__main__":
     main()

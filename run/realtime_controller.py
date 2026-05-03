@@ -714,7 +714,7 @@ def main():
     global serial_reader, gesture_engine
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--port", default="COM3")
+    parser.add_argument("--port", default="COM5")
     parser.add_argument("--baud", default=115200, type=int)
     parser.add_argument("--model", default=MODEL_PATH)
     parser.add_argument("--host", default="127.0.0.1")
