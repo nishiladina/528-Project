@@ -14,7 +14,7 @@ import joblib
 from flask import Flask, Response, render_template_string, jsonify
 import pyautogui
 
-from svm_dataset import extract_features
+from extra_tree_dataset import extract_features
 
 
 # =========================
@@ -22,7 +22,7 @@ from svm_dataset import extract_features
 # =========================
 
 FS = 33.0
-MODEL_PATH = "svm_model.joblib"
+MODEL_PATH = "run/extra_trees.joblib"
 
 STEP_SAMPLES = 15
 WINDOW_SAMPLES = 75
