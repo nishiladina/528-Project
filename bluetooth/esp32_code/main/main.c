@@ -253,7 +253,7 @@ void app_main(void)
         mpu6050_get_temp(mpu6050, &temp);
 
         int len = snprintf(tx_buf, sizeof(tx_buf),
-                           "%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n",
+                           "Accel: %.2f, %.2f, %.2f\nGyro: %.2f, %.2f, %.2f\n",
                            acce.acce_x, acce.acce_y, acce.acce_z,
                            gyro.gyro_x, gyro.gyro_y, gyro.gyro_z);
 
