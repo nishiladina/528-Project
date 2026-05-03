@@ -14,8 +14,8 @@
 #include <string.h>
 
 /* ── I2C / sensor config ─────────────────────────────────────────────────── */
-#define I2C_MASTER_SCL_IO    1
-#define I2C_MASTER_SDA_IO    0
+#define I2C_MASTER_SCL_IO    20
+#define I2C_MASTER_SDA_IO    21
 #define I2C_MASTER_NUM       I2C_NUM_0
 #define I2C_MASTER_FREQ_HZ   400000
 #define SAMPLE_PERIOD_MS     10
@@ -253,11 +253,9 @@ void app_main(void)
         mpu6050_get_temp(mpu6050, &temp);
 
         int len = snprintf(tx_buf, sizeof(tx_buf),
-                           "AX:%.3f AY:%.3f AZ:%.3f "
-                           "GX:%.3f GY:%.3f GZ:%.3f T:%.2f\n",
+                           "Accel: %.2f, %.2f, %.2f\nGyro: %.2f, %.2f, %.2f\n",
                            acce.acce_x, acce.acce_y, acce.acce_z,
-                           gyro.gyro_x, gyro.gyro_y, gyro.gyro_z,
-                           temp.temp);
+                           gyro.gyro_x, gyro.gyro_y, gyro.gyro_z);
 
         ble_nus_send(tx_buf, len);
 
