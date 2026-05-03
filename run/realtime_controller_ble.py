@@ -200,7 +200,7 @@ class GestureEngine:
             pyautogui.press('volumedown')
 
         #Rotate head clockwise - Activate/Deactivate key
-        elif(label == "clockwise"):
+        elif(self.activated and label == "clockwise"):
             pyautogui.press('volumeup')
 
         if(label == "None"):
