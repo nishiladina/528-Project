@@ -36,10 +36,10 @@ void app_main(void)
                 mpu6050_get_acceleration(&dev, &accel);
                 mpu6050_get_rotation(&dev, &gyro);
 
-                printf("%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", accel.x, accel.y, accel.z, gyro.x, gyro.y, gyro.z);
+                printf("Accel: %.2f, %.2f, %.2f\nGyro: %.2f, %.2f, %.2f\n", accel.x, accel.y, accel.z, gyro.x, gyro.y, gyro.z);
                 
-                // wait 10 ms before the next reading (100 hz)
-                vTaskDelay(pdMS_TO_TICKS(10));
+                // wait 30 ms before the next reading (33 hz)
+                vTaskDelay(pdMS_TO_TICKS(30));
             }
 
             printf("FILE_END:%02d\n", i);
