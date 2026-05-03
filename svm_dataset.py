@@ -75,6 +75,22 @@ def extract_features(accel, gyro):
         for axis in range(3):
             signal = sensor[:, axis]
             features.extend(compute_fft_features(signal, SAMPLE_RATE))
+            
+    # Gyro specific features
+    gyro_energy = np.sum(gyro**2, axis=0)
+    dominant_axis = np.argmax(gyro_energy)
+
+    signal = gyro[:, dominant_axis]
+    mid = len(signal) // 2
+
+    direction = np.sum(signal)
+    direction_pattern = np.mean(signal[:mid]) - np.mean(signal[mid:])
+
+    features.extend([
+        dominant_axis,
+        direction,
+        direction_pattern
+    ])
 
     return np.array(features)
 
