@@ -168,44 +168,44 @@ class GestureEngine:
         self.captionsOn = False
 
     def movement(self, label, buffer):
-        # Look Down — scroll down
-        if self.activated and label == "down":
+        global captionsOn, activated
+        #Look Down - scroll down
+        if(self.activated and label == "down"):
             pyautogui.scroll(-10)
-
-        # Look Up — scroll up
-        elif self.activated and label == "up":
+        
+        #Look Up - scroll up
+        elif(self.activated and label == "up"):
             pyautogui.scroll(10)
 
-        # Look left — volume down
-        elif self.activated and label == "left":
-            pyautogui.press('volumedown')
+        #Look left - less volume
+        elif(self.activated and label == "left"):
+            pyautogui.press('l')
 
-        # Look right — volume up
-        elif self.activated and label == "right":
-            pyautogui.press('volumeup')
 
-        # Lay head on left shoulder — Play/Pause
-        elif self.activated and label == "left_lean":
+        #Look right - more volume
+        elif(label == "right"):
+            self.activated = not self.activated
+            print("Activated:", self.activated)
+
+        #Lay head on left shoulder - Play/Pause
+        elif(self.activated and label == "left_lean"):
             pyautogui.press('space')
 
-        # Lay head on right shoulder — mute (YouTube Shorts)
-        elif self.activated and label == "right_lean":
+        #Lay head on right shoulder - mute for youtube shorts
+        elif(self.activated and label == "right_lean"):
             pyautogui.press('m')
 
-        # Rotate head counter-clockwise — toggle captions
-        elif self.activated and label == "counter_clockwise":
-            if self.captionsOn:
-                pyautogui.click('C')
-            else:
-                pyautogui.click('c')
-            self.captionsOn = not self.captionsOn
+        #Activate close captions - Rotate head counterclockwise
+        elif(self.activated and label == "counter_clockwise"):
+            pyautogui.press('volumedown')
 
-        # Rotate head clockwise — activate / deactivate
-        elif label == "clockwise":
-            self.activated = not self.activated
+        #Rotate head clockwise - Activate/Deactivate key
+        elif(label == "clockwise"):
+            pyautogui.press('volumeup')
 
-        if label == "None":
+        if(label == "None"):
             buffer.popleft()
+
         else:
             buffer.clear()
 
